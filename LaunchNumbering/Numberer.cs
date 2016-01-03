@@ -94,13 +94,7 @@ namespace LaunchNumbering
 			if (ReferenceEquals(_vessels, null)) return;
 			if (_vessels.Contains(v.id)) return;
 			_vessels.Add(v.id);
-			int vesselHash;
-			unchecked
-			{
-				vesselHash = v.parts.Aggregate(32767,
-					(a, p) => (a << 3 | ((a >> 29) & 0x7)) ^ p.partName.GetHashCode() ^
-					p.editorLinks.Aggregate(19, (a2, p2) => (a2 << 3 | ((a2 >> 29) & 0x7)) ^ p2.partName.GetHashCode()));
-			}
+			int vesselHash = ComputeVesselHash(v);
 			var vesselNumber = 1;
 			var blocNumber = 1;
 			if (!_numbering.ContainsKey(v.vesselName))
@@ -133,6 +127,16 @@ namespace LaunchNumbering
 			if (!string.IsNullOrEmpty(addition))
 			{
 				v.vesselName += addition;
+			}
+		}
+
+		private static int ComputeVesselHash(Vessel v)
+		{
+			unchecked
+			{
+				return v.parts.Aggregate(32767,
+					(a, p) => (a << 3 | ((a >> 29) & 0x7)) ^ p.partName.GetHashCode() ^
+					p.editorLinks.Aggregate(19, (a2, p2) => (a2 << 3 | ((a2 >> 29) & 0x7)) ^ p2.partName.GetHashCode()));
 			}
 		}
 
