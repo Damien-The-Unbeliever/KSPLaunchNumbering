@@ -6,14 +6,19 @@ using UnityEngine;
 
 namespace LaunchNumbering
 {
-	[KSPAddon(KSPAddon.Startup.Flight, false)]
-	public class Numberer : MonoBehaviour
+	[KSPScenario(ScenarioCreationOptions.AddToAllGames, new GameScenes[] { GameScenes.SPACECENTER, GameScenes.EDITOR, GameScenes.FLIGHT })]
+	public class LaunchNumberer : ScenarioModule
 	{
-		public void Awake()
+		public override void OnAwake()
 		{
-			//Called first - load settings?
-			GameEvents.onGameStateSave.Add(HandleSave);
-			GameEvents.onGameStateLoad.Add(HandleLoad);
+			_numbering = new Dictionary<string, Dictionary<int, Bloc>>();
+			GameEvents.OnVesselRollout.Add(RenameVessel);
+		}
+
+
+		public void OnDestroy()
+		{
+			GameEvents.OnVesselRollout.Remove(RenameVessel);
 		}
 
 		private const string TopLevelNodeLabel = "LAUNCHNUMBERS";
@@ -23,16 +28,12 @@ namespace LaunchNumbering
 		private const string VesselHashLabel = "vessel-hash";
 		private const string BlocNumberLabel = "bloc-number";
 		private const string VesselCountLabel = "vessel-count";
-		private const string VesselNodeLabel = "VESSEL";
-		private const string VesselIdLabel = "id";
 
-		public void HandleLoad(ConfigNode node)
+		public override void OnLoad(ConfigNode node)
 		{
-			_vessels = new List<Guid>();
+			Debug.Log("XXX - Loading");
 			_numbering = new Dictionary<string, Dictionary<int, Bloc>>();
-			if (!node.HasNode(TopLevelNodeLabel)) return;
-			ConfigNode LNN = node.GetNode(TopLevelNodeLabel);
-			foreach(var serNode in LNN.GetNodes(SeriesNodeLabel))
+			foreach(var serNode in node.GetNodes(SeriesNodeLabel))
 			{
 				var blocs = new Dictionary<int, Bloc>();
 				_numbering.Add(serNode.GetValue(BlocNameLabel), blocs);
@@ -45,23 +46,11 @@ namespace LaunchNumbering
 					});
 				}
 			}
-			foreach(var vesNode in LNN.GetNodes(VesselNodeLabel))
-			{
-				_vessels.Add(new Guid(vesNode.GetValue(VesselIdLabel)));
-			}
 		}
-		public void HandleSave(ConfigNode node)
+		public override void OnSave(ConfigNode node)
 		{
-			ConfigNode LNN;
-			if (node.HasNode(TopLevelNodeLabel))
-			{
-				LNN = node.GetNode(TopLevelNodeLabel);
-			}
-			else {
-				LNN = new ConfigNode(TopLevelNodeLabel);
-				node.AddNode(LNN);
-			}
-			LNN.ClearNodes();
+			Debug.Log("XXX - Saving");
+			node.ClearNodes();
 			foreach (var series in _numbering)
 			{
 				var serNode = new ConfigNode(SeriesNodeLabel);
@@ -74,26 +63,16 @@ namespace LaunchNumbering
 					blocNode.AddValue(BlocNumberLabel, bloc.Value.blocNumber);
 					serNode.AddNode(blocNode);
 				}
-				LNN.AddNode(serNode);
-			}
-			foreach(var vessel in _vessels)
-			{
-				var vesNode = new ConfigNode(VesselNodeLabel);
-				vesNode.AddValue(VesselIdLabel, vessel);
-				LNN.AddNode(vesNode);
+				node.AddNode(serNode);
 			}
 		}
 
-		private List<Guid> _vessels = new List<Guid>();
-		private Dictionary<string, Dictionary<int, Bloc>> _numbering = new Dictionary<string, Dictionary<int, Bloc>>();
+		private Dictionary<string, Dictionary<int, Bloc>> _numbering;
 
-		public void FixedUpdate()
+		public void RenameVessel(ShipConstruct sc)
 		{
-			var v = FlightGlobals.ActiveVessel;
-			if (ReferenceEquals(v, null)) return;
-			if (ReferenceEquals(_vessels, null)) return;
-			if (_vessels.Contains(v.id)) return;
-			_vessels.Add(v.id);
+			Debug.Log("XXX - Registering Vessel");
+			Vessel v = FlightGlobals.ActiveVessel;
 			int vesselHash = ComputeVesselHash(v);
 			var vesselNumber = 1;
 			var blocNumber = 1;
