@@ -83,6 +83,7 @@ namespace LaunchNumbering
 			int vesselHash = ComputeVesselHash(v);
 			var vesselNumber = 1;
 			var blocNumber = 1;
+			if (Char.IsDigit(v.vesselName[v.vesselName.Length - 1])) return;
 			if (!_numbering.ContainsKey(v.vesselName))
 			{
 				_numbering.Add(v.vesselName, new Dictionary<int, Bloc>());
