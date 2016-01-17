@@ -5,6 +5,25 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaunchNumbering", "LaunchNumbering\LaunchNumbering.csproj", "{0ACC6D11-5A19-4BE0-84CF-E58837020097}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{38E178AA-8E91-4EF7-ABAA-6F836C29E249}"
+	ProjectSection(SolutionItems) = preProject
+		Images\Composed.png = Images\Composed.png
+		Images\LaunchPanel.png = Images\LaunchPanel.png
+		Images\screenshot0.png = Images\screenshot0.png
+		Images\screenshot1.png = Images\screenshot1.png
+		Images\screenshot10.png = Images\screenshot10.png
+		Images\screenshot11.png = Images\screenshot11.png
+		Images\screenshot2.png = Images\screenshot2.png
+		Images\screenshot3.png = Images\screenshot3.png
+		Images\screenshot4.png = Images\screenshot4.png
+		Images\screenshot5.png = Images\screenshot5.png
+		Images\screenshot6.png = Images\screenshot6.png
+		Images\screenshot7.png = Images\screenshot7.png
+		Images\screenshot8.png = Images\screenshot8.png
+		Images\screenshot9.png = Images\screenshot9.png
+		Images\TrackingCentreList.png = Images\TrackingCentreList.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

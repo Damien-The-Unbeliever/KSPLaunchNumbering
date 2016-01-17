@@ -117,7 +117,7 @@ namespace LaunchNumbering
 			{
 				var oldName = v.vesselName;
 				var newName = oldName + addition;
-				v.vesselName += newName;
+				v.vesselName = newName;
 				ScreenMessages.PostScreenMessage("Launch: " + newName, MessageDisplayLength, ScreenMessageStyle.UPPER_CENTER);
 			}
 			else
