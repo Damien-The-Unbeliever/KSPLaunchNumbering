@@ -28,10 +28,12 @@ namespace LaunchNumbering
 		private const string VesselHashLabel = "vessel-hash";
 		private const string BlocNumberLabel = "bloc-number";
 		private const string VesselCountLabel = "vessel-count";
+		private const string ShowBlocLabel = "bloc-shown";
+		private const string BlocRomanLabel = "bloc-roman";
+		private const string VesselRomanLabel = "vessel-roman";
 
 		public override void OnLoad(ConfigNode node)
 		{
-			Debug.Log("XXX - Loading");
 			_numbering = new Dictionary<string, Dictionary<int, Bloc>>();
 			foreach(var serNode in node.GetNodes(SeriesNodeLabel))
 			{
@@ -42,14 +44,16 @@ namespace LaunchNumbering
 					blocs.Add(int.Parse(blocNode.GetValue(VesselHashLabel)), new Bloc
 					{
 						blocNumber = int.Parse(blocNode.GetValue(BlocNumberLabel)),
-						vessel = int.Parse(blocNode.GetValue(VesselCountLabel))
+						vessel = int.Parse(blocNode.GetValue(VesselCountLabel)),
+						blocRoman = bool.Parse(blocNode.GetValue(BlocRomanLabel)),
+						vesselRoman = bool.Parse(blocNode.GetValue(VesselRomanLabel)),
+						showBloc = bool.Parse(blocNode.GetValue(ShowBlocLabel))
 					});
 				}
 			}
 		}
 		public override void OnSave(ConfigNode node)
 		{
-			Debug.Log("XXX - Saving");
 			node.ClearNodes();
 			foreach (var series in _numbering)
 			{
@@ -61,6 +65,9 @@ namespace LaunchNumbering
 					blocNode.AddValue(VesselHashLabel, bloc.Key);
 					blocNode.AddValue(VesselCountLabel, bloc.Value.vessel);
 					blocNode.AddValue(BlocNumberLabel, bloc.Value.blocNumber);
+					blocNode.AddValue(BlocRomanLabel, bloc.Value.blocRoman);
+					blocNode.AddValue(VesselRomanLabel, bloc.Value.vesselRoman);
+					blocNode.AddValue(ShowBlocLabel, bloc.Value.showBloc);
 					serNode.AddNode(blocNode);
 				}
 				node.AddNode(serNode);
@@ -71,7 +78,6 @@ namespace LaunchNumbering
 
 		public void RenameVessel(ShipConstruct sc)
 		{
-			Debug.Log("XXX - Registering Vessel");
 			Vessel v = FlightGlobals.ActiveVessel;
 			int vesselHash = ComputeVesselHash(v);
 			var vesselNumber = 1;
@@ -81,14 +87,16 @@ namespace LaunchNumbering
 				_numbering.Add(v.vesselName, new Dictionary<int, Bloc>());
 			}
 			var nDict = _numbering[v.vesselName];
+			Bloc b;
 			if (!nDict.ContainsKey(vesselHash))
 			{
 				blocNumber = nDict.Count + 1;
-				nDict.Add(vesselHash, new Bloc { vessel = 1, blocNumber = blocNumber });
+				b = new Bloc { vessel = 1, blocNumber = blocNumber, showBloc = false, vesselRoman = false, blocRoman = false };
+				nDict.Add(vesselHash, b);
 			}
 			else
 			{
-				Bloc b = nDict[vesselHash];
+				b = nDict[vesselHash];
 				vesselNumber = b.vessel + 1;
 				b.vessel = vesselNumber;
 				blocNumber = b.blocNumber;
@@ -96,11 +104,11 @@ namespace LaunchNumbering
 			string addition = string.Empty;
 			if (vesselNumber > 1)
 			{
-				addition = addition + " " + vesselNumber.ToString();
+				addition = addition + " " + (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString());
 			}
-			if (blocNumber > 1)
+			if (blocNumber > 1&&b.showBloc)
 			{
-				addition = addition + " (Bloc " + ToRoman(blocNumber) + ")";
+				addition = addition + " (Bloc " + (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString()) + ")";
 			}
 
 			if (!string.IsNullOrEmpty(addition))
@@ -111,12 +119,7 @@ namespace LaunchNumbering
 
 		private static int ComputeVesselHash(Vessel v)
 		{
-			unchecked
-			{
-				return v.parts.Aggregate(32767,
-					(a, p) => (a << 3 | ((a >> 29) & 0x7)) ^ p.partName.GetHashCode() ^
-					p.editorLinks.Aggregate(19, (a2, p2) => (a2 << 3 | ((a2 >> 29) & 0x7)) ^ p2.partName.GetHashCode()));
-			}
+			return 1;
 		}
 
 		private readonly int[] _RValues = new int[] { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };

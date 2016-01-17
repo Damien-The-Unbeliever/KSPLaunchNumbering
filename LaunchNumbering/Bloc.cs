@@ -8,6 +8,9 @@ namespace LaunchNumbering
 	public class Bloc
 	{
 		public int vessel;
-		public int blocNumber; 
+		public int blocNumber;
+		public bool blocRoman;
+		public bool vesselRoman;
+		public bool showBloc; 
 	}
 }
