@@ -31,6 +31,7 @@ namespace LaunchNumbering
 		private const string ShowBlocLabel = "bloc-shown";
 		private const string BlocRomanLabel = "bloc-roman";
 		private const string VesselRomanLabel = "vessel-roman";
+		private const float MessageDisplayLength = 5.0f;
 
 		public override void OnLoad(ConfigNode node)
 		{
@@ -113,7 +114,14 @@ namespace LaunchNumbering
 
 			if (!string.IsNullOrEmpty(addition))
 			{
-				v.vesselName += addition;
+				var oldName = v.vesselName;
+				var newName = oldName + addition;
+				v.vesselName += newName;
+				ScreenMessages.PostScreenMessage("Launch: " + newName, MessageDisplayLength, ScreenMessageStyle.UPPER_CENTER);
+			}
+			else
+			{
+				ScreenMessages.PostScreenMessage("Initial launch", MessageDisplayLength, ScreenMessageStyle.UPPER_CENTER);
 			}
 		}
 
