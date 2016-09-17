@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KSP.UI.Screens;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -93,7 +94,7 @@ namespace LaunchNumbering
 			if (!nDict.ContainsKey(vesselHash))
 			{
 				blocNumber = nDict.Count + 1;
-				b = new Bloc { vessel = 1, blocNumber = blocNumber, showBloc = false, vesselRoman = false, blocRoman = false };
+				b = InitializeNewBloc(blocNumber);
 				nDict.Add(vesselHash, b);
 			}
 			else
@@ -124,6 +125,18 @@ namespace LaunchNumbering
 			{
 				ScreenMessages.PostScreenMessage("Initial launch", MessageDisplayLength, ScreenMessageStyle.UPPER_CENTER);
 			}
+		}
+
+		private static Bloc InitializeNewBloc(int blocNumber)
+		{
+			var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
+			return new Bloc {
+				vessel = 1,
+				blocNumber = blocNumber,
+				showBloc = settings.ShowBloc,
+				vesselRoman = settings.Scheme== LNSettings.NumberScheme.Roman,
+				blocRoman = settings.BlocScheme==LNSettings.NumberScheme.Roman
+			};
 		}
 
 		private static int ComputeVesselHash(Vessel v)
