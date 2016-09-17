@@ -91,6 +91,13 @@ namespace LaunchNumbering
 			}
 			var nDict = _numbering[v.vesselName];
 			Bloc b;
+			if (vesselHash!=1 && nDict.Count == 1 && nDict.ContainsKey(1))
+			{
+				//Upgrade from earlier version
+				b = nDict[1];
+				nDict.Remove(1);
+				nDict.Add(vesselHash, b);			
+			}
 			if (!nDict.ContainsKey(vesselHash))
 			{
 				blocNumber = nDict.Count + 1;
@@ -141,7 +148,34 @@ namespace LaunchNumbering
 
 		private static int ComputeVesselHash(Vessel v)
 		{
-			return 1;
+			int nameCounter = 0;
+			var names = new Dictionary<string, int>();
+			var treeItems = new List<int>();
+			foreach(var p in v.Parts)
+			{
+				if (!names.ContainsKey(p.name)) names.Add(p.name, ++nameCounter);
+				treeItems.Add(names[p.name]);
+				if (p.children.Count > 0)
+				{
+					treeItems.Add(-1);
+					foreach(var c in p.children)
+					{
+						if (!names.ContainsKey(c.name)) names.Add(c.name, ++nameCounter);
+						treeItems.Add(names[c.name]);
+					}
+					treeItems.Add(-2);
+				}
+			}
+			return QuickHash(treeItems);
+		}
+		private static int QuickHash(List<int> items)
+		{
+			int hashCode = items.Count;
+			foreach (int item in items)
+			{
+				hashCode = unchecked(hashCode * 314159 + item);
+			}
+			return hashCode;
 		}
 
 		private readonly int[] _RValues = new int[] { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
