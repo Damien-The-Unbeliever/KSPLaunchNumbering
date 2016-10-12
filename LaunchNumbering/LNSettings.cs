@@ -20,9 +20,9 @@ namespace LaunchNumbering
 		[GameParameters.CustomParameterUI("Numbering Scheme")]
 		public NumberScheme Scheme { get; set; }
 		[GameParameters.CustomParameterUI("Show Bloc numbers")]
-		public bool ShowBloc { get; set; }
+		public bool ShowBloc { get; set; } = true;
 		[GameParameters.CustomParameterUI("Bloc Numbering Scheme")]
-		public NumberScheme BlocScheme { get; set; }
+		public NumberScheme BlocScheme { get; set; } = NumberScheme.Roman;
 		public enum NumberScheme
 		{
 			Arabic,
