@@ -23,6 +23,9 @@ namespace LaunchNumbering
 		public bool ShowBloc { get; set; } = true;
 		[GameParameters.CustomParameterUI("Bloc Numbering Scheme")]
 		public NumberScheme BlocScheme { get; set; } = NumberScheme.Roman;
+
+		public override string DisplaySection => "Launch Numbering";
+
 		public enum NumberScheme
 		{
 			Arabic,
