@@ -1,0 +1,31 @@
+Moved actual processing of new name into new method: ProcessTemplate
+Added template processing, default template matches original code
+Added new settings options:
+	addAlways
+	addToFirstVessel
+	Minimum # of digits for launch number
+	Minimum # of digits for bloc number
+	ActiveOnLaunchpad
+	ActiveOnRunway
+	ActiveOnExternalLaunchpad (used by EPL)
+
+Template Definition
+	There are three fields available:
+		name
+		launchNumber
+		blocNumber
+
+	The template is case sensitive
+	Each field is surrounded by matching braces and brackets
+	Text between the brace and the bracket is only added to the vessel name if the field is used (ie:  bloc number isn't always used)
+
+	Example:
+		If the original vessel name is "Mercury", this is the second launch of block 2:
+		This template:
+
+			{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}
+
+		will produce the following vessel name:
+
+			Mercury-2 (Bloc 2)
+
