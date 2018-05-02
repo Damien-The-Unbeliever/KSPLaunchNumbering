@@ -1,3 +1,7 @@
+5-2-2018
+	Changed format from Hex (X) to numeric (N)
+
+12-12-2017
 Moved actual processing of new name into new method: ProcessTemplate
 Added template processing, default template matches original code
 Added new settings options:
@@ -28,4 +32,5 @@ Template Definition
 		will produce the following vessel name:
 
 			Mercury-2 (Bloc 2)
+
 
