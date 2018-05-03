@@ -32,11 +32,11 @@ namespace LaunchNumbering
                 {
                     s = s.Replace("[name]", v.vesselName);
                     if (vesselNumber > 1 || settings.addAlways)
-                        s = s.Replace("[launchNumber]", (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString("N" + (1 +settings.launchNumberMinDigits).ToString())));
+                        s = s.Replace("[launchNumber]", (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString("D" + (1 +settings.launchNumberMinDigits).ToString())));
 
                     if (blocNumber > 1 && b.showBloc)
                     {
-                        s = s.Replace("[blocNumber]", (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString("N" + (1 +settings.blocNumberMinDigits).ToString())));
+                        s = s.Replace("[blocNumber]", (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString("D" + (1 +settings.blocNumberMinDigits).ToString())));
                     }
                     if (s != section)
                         name += s.Substring(1, s.Length - 2);
