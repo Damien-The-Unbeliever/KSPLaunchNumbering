@@ -12,9 +12,9 @@ namespace LaunchNumbering
 {
     partial class LaunchNumberer
     {
-        static string PLUGINDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/templates.dat";
+        internal static string PLUGINDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/templates.dat";
 
-        const string defaultTemplate = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
+        //internal const string defaultTemplate = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
 
         string ProcessTemplate(string template, Vessel v, Bloc b, int vesselNumber, int blocNumber)
         {
@@ -52,18 +52,8 @@ namespace LaunchNumbering
 
         string ProcessTemplate(Vessel v, Bloc b, int vesselNumber, int blocNumber)
         {
-            string t = defaultTemplate;
-
-            if (System.IO.File.Exists(PLUGINDATA))
-            {
-                var templatedata = System.IO.File.ReadAllLines(PLUGINDATA);
-                // For now, only use the first line
-                if (templatedata.Count() > 0)
-                    t = templatedata[0];
-            }
-
-            string s = ProcessTemplate(t, v, b, vesselNumber, blocNumber);
-            Debug.Log("template: " + t);
+            string s = ProcessTemplate(SelectTemplate.selectedTemplate, v, b, vesselNumber, blocNumber);
+            Debug.Log("template: " + SelectTemplate.selectedTemplate);
             Debug.Log("vesselName: " + s);
 
             return s;

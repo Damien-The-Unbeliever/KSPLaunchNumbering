@@ -1,5 +1,11 @@
+0.5.0
+	Added Template Selection Window
+	Added support for ToolbarController
+	Added support for ClickThrough Blocker
+	Changed format of template.dat
+
 5-3-2018
-	Changed format from numeric (N) to deciman (D)
+	Changed format from numeric (N) to decimal (D)
 5-2-2018
 	Changed format from Hex (X) to numeric (N)
 
