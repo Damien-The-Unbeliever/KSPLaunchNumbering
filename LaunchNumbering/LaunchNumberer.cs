@@ -37,9 +37,11 @@ namespace LaunchNumbering
         private const string BlocRomanLabel = "bloc-roman";
         private const string VesselRomanLabel = "vessel-roman";
         private const float MessageDisplayLength = 5.0f;
+        private const string PreferredTemplate = "preferred-template";
 
         public override void OnLoad(ConfigNode node)
         {
+            node.TryGetValue(PreferredTemplate, ref SelectTemplate.selectedTemplateName);
             _numbering = new Dictionary<string, Dictionary<int, Bloc>>();
             foreach (var serNode in node.GetNodes(SeriesNodeLabel))
             {
@@ -61,6 +63,7 @@ namespace LaunchNumbering
         public override void OnSave(ConfigNode node)
         {
             node.ClearNodes();
+            node.AddValue(PreferredTemplate, SelectTemplate.selectedTemplateName);
             foreach (var series in _numbering)
             {
                 var serNode = new ConfigNode(SeriesNodeLabel);
@@ -84,7 +87,7 @@ namespace LaunchNumbering
 
         public void RenameVessel(ShipConstruct sc)
         {
-            Debug.Log("RenameVessel, vessel.landedAt: " + FlightGlobals.ActiveVessel.landedAt);
+            //Debug.Log("RenameVessel, vessel.landedAt: " + FlightGlobals.ActiveVessel.landedAt);
             var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
             if ((settings.activeOnLaunchpad && FlightGlobals.ActiveVessel.landedAt == "LaunchPad") ||
                 (settings.activeOnRunway && FlightGlobals.ActiveVessel.landedAt == "Runway") ||
@@ -92,7 +95,12 @@ namespace LaunchNumbering
                 )
             {
                 Vessel v = FlightGlobals.ActiveVessel;
-                int vesselHash = ComputeVesselHash(v);
+                int vesselHash;
+                if (SelectTemplate.selectedTemplate.Contains("blocNumber"))
+                    vesselHash = 1;
+                else
+                    vesselHash = ComputeVesselHash(v);
+
                 var vesselNumber = 1;
                 var blocNumber = 1;
                 if (!settings.addAlways && Char.IsDigit(v.vesselName[v.vesselName.Length - 1])) return;
@@ -102,6 +110,8 @@ namespace LaunchNumbering
                 }
                 var nDict = _numbering[v.vesselName];
                 Bloc b;
+
+         
                 if (vesselHash != 1 && nDict.Count == 1 && nDict.ContainsKey(1))
                 {
                     //Upgrade from earlier version
@@ -109,7 +119,7 @@ namespace LaunchNumbering
                     nDict.Remove(1);
                     nDict.Add(vesselHash, b);
                 }
-                if (!nDict.ContainsKey(vesselHash))
+                if ( !nDict.ContainsKey(vesselHash))
                 {
                     blocNumber = nDict.Count + 1;
                     b = InitializeNewBloc(blocNumber);

@@ -13,6 +13,7 @@ namespace LaunchNumbering
     partial class LaunchNumberer
     {
         internal static string PLUGINDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/templates.dat";
+        internal static string DEFAULTDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/default.dat";
 
         //internal const string defaultTemplate = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
 
@@ -32,11 +33,11 @@ namespace LaunchNumbering
                 {
                     s = s.Replace("[name]", v.vesselName);
                     if (vesselNumber > 1 || settings.addAlways)
-                        s = s.Replace("[launchNumber]", (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString("D" + (1 +settings.launchNumberMinDigits).ToString())));
+                        s = s.Replace("[launchNumber]", (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString("D" + (settings.launchNumberMinDigits).ToString())));
 
                     if (blocNumber > 1 && b.showBloc)
                     {
-                        s = s.Replace("[blocNumber]", (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString("D" + (1 +settings.blocNumberMinDigits).ToString())));
+                        s = s.Replace("[blocNumber]", (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString("D" + (settings.blocNumberMinDigits).ToString())));
                     }
                     if (s != section)
                         name += s.Substring(1, s.Length - 2);
@@ -53,8 +54,8 @@ namespace LaunchNumbering
         string ProcessTemplate(Vessel v, Bloc b, int vesselNumber, int blocNumber)
         {
             string s = ProcessTemplate(SelectTemplate.selectedTemplate, v, b, vesselNumber, blocNumber);
-            Debug.Log("template: " + SelectTemplate.selectedTemplate);
-            Debug.Log("vesselName: " + s);
+            //Debug.Log("template: " + SelectTemplate.selectedTemplate);
+            //Debug.Log("vesselName: " + s);
 
             return s;
 

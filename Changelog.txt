@@ -1,4 +1,14 @@
+0.5.1
+	Now sets the selected template from the file instead of using hard-coded version
+	Added method to save selected default template
+	Added method to read selected default template
+	Added code to only use launchNumbers if no blocNumber in selected template
+	Added additional templates
+
+
 0.5.0
+	Adoption by LGG
+	Compiled for 1.4
 	Added Template Selection Window
 	Added support for ToolbarController
 	Added support for ClickThrough Blocker

@@ -29,6 +29,7 @@ namespace LaunchNumbering
         {
             AddToolbarButton();
             WindowRect = new Rect(Screen.width - WIDTH - 70, Screen.height - HEIGHT - 40, WIDTH, HEIGHT);
+            LoadData(true);
         }
 
         void AddToolbarButton()
@@ -74,8 +75,9 @@ namespace LaunchNumbering
         internal static string selectedTemplate = DEFAULT_TEMPLATE;
         bool showTemplate = false;
 
-        void LoadData()
+        void LoadData(bool setDefault = false)
         {
+            //ReadDefault();
             if (System.IO.File.Exists(LaunchNumberer.PLUGINDATA))
             {
                 var t = System.IO.File.ReadAllLines(LaunchNumberer.PLUGINDATA);
@@ -87,6 +89,9 @@ namespace LaunchNumbering
                         var name = l.Substring(0, l.IndexOf(','));
                         var template = l.Substring(l.IndexOf(',') + 1);
                         templatelist.Add(new Template(name, template));
+
+                        if (setDefault && name == selectedTemplateName)
+                            selectedTemplate = template;
                     }
                 }
             }
@@ -95,6 +100,17 @@ namespace LaunchNumbering
                 templatelist.Clear();
             }
         }
+#if false
+        void ReadDefault()
+        {
+            if (System.IO.File.Exists(LaunchNumberer.DEFAULTDATA))
+                selectedTemplateName = System.IO.File.ReadAllText(LaunchNumberer.DEFAULTDATA);
+        }
+        void SaveDefault()
+        {
+            System.IO.File.WriteAllText(LaunchNumberer.DEFAULTDATA, selectedTemplateName);
+        }
+#endif
         void DoWindow(int id)
         {
             if (templatelist.Count == 0)
@@ -136,6 +152,7 @@ namespace LaunchNumbering
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Close"))
             {
+                //SaveDefault();
                 GUIEnabled = false;
             }
             GUILayout.FlexibleSpace();
