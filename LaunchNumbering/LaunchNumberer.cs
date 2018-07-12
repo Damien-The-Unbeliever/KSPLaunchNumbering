@@ -87,10 +87,16 @@ namespace LaunchNumbering
 
         public void RenameVessel(ShipConstruct sc)
         {
-            //Debug.Log("RenameVessel, vessel.landedAt: " + FlightGlobals.ActiveVessel.landedAt);
+            Debug.Log("RenameVessel, vessel.landedAt: " + FlightGlobals.ActiveVessel.landedAt);
             var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
-            if ((settings.activeOnLaunchpad && FlightGlobals.ActiveVessel.landedAt == "LaunchPad") ||
-                (settings.activeOnRunway && FlightGlobals.ActiveVessel.landedAt == "Runway") ||
+            if ((settings.activeOnLaunchpad &&
+                (FlightGlobals.ActiveVessel.landedAt == "LaunchPad" ||
+                 FlightGlobals.ActiveVessel.landedAt == "Woomerang_Launch_Site" ||
+                 FlightGlobals.ActiveVessel.landedAt == "Desert_Launch_Site")) ||
+                (settings.activeOnRunway &&
+                 (FlightGlobals.ActiveVessel.landedAt == "Runway" ||
+                  FlightGlobals.ActiveVessel.landedAt == "Island_Airfield" ||
+                  FlightGlobals.ActiveVessel.landedAt == "Desert_Airfield")) ||
                 (settings.activeOnExternalLaunchpad && FlightGlobals.ActiveVessel.landedAt == "External LaunchPad")
                 )
             {
@@ -111,7 +117,7 @@ namespace LaunchNumbering
                 var nDict = _numbering[v.vesselName];
                 Bloc b;
 
-         
+
                 if (vesselHash != 1 && nDict.Count == 1 && nDict.ContainsKey(1))
                 {
                     //Upgrade from earlier version
@@ -119,7 +125,7 @@ namespace LaunchNumbering
                     nDict.Remove(1);
                     nDict.Add(vesselHash, b);
                 }
-                if ( !nDict.ContainsKey(vesselHash))
+                if (!nDict.ContainsKey(vesselHash))
                 {
                     blocNumber = nDict.Count + 1;
                     b = InitializeNewBloc(blocNumber);

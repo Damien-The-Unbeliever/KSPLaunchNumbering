@@ -1,3 +1,6 @@
+0.5.2
+	Added new launch sites and airfields (from the Making History) as recognizable launch sites
+
 0.5.1
 	Now sets the selected template from the file instead of using hard-coded version
 	Added method to save selected default template
