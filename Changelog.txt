@@ -1,3 +1,6 @@
+0.5.2.1
+	Version bump for 1.5 rebuild
+
 0.5.2
 	Added new launch sites and airfields (from the Making History) as recognizable launch sites
 
