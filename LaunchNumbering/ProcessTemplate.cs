@@ -12,9 +12,16 @@ namespace LaunchNumbering
 {
     partial class LaunchNumberer
     {
-        internal static string PLUGINDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/templates.dat";
-        internal static string DEFAULTDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/default.dat";
+        internal static string PLUGINDATA;
+        internal static string DEFAULTDATA;
 
+        void Awake()
+        {
+            PLUGINDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/templates.dat";
+            DEFAULTDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/default.dat";
+
+
+        }
         //internal const string defaultTemplate = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
 
         string ProcessTemplate(string template, Vessel v, Bloc b, int vesselNumber, int blocNumber)
@@ -27,26 +34,26 @@ namespace LaunchNumbering
 
             foreach (string section in sections)
                 if (section != "")
-            {
-                string s = section;
-                if (s.Contains("[name]") || s.Contains("[launchNumber]") || s.Contains("blocNumber]"))
                 {
-                    s = s.Replace("[name]", v.vesselName);
-                    if (vesselNumber > 1 || settings.addAlways)
-                        s = s.Replace("[launchNumber]", (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString("D" + (settings.launchNumberMinDigits).ToString())));
-
-                    if (blocNumber > 1 && b.showBloc)
+                    string s = section;
+                    if (s.Contains("[name]") || s.Contains("[launchNumber]") || s.Contains("blocNumber]"))
                     {
-                        s = s.Replace("[blocNumber]", (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString("D" + (settings.blocNumberMinDigits).ToString())));
+                        s = s.Replace("[name]", v.vesselName);
+                        if (vesselNumber > 1 || settings.addAlways)
+                            s = s.Replace("[launchNumber]", (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString("D" + (settings.launchNumberMinDigits).ToString())));
+
+                        if (blocNumber > 1 && b.showBloc)
+                        {
+                            s = s.Replace("[blocNumber]", (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString("D" + (settings.blocNumberMinDigits).ToString())));
+                        }
+                        if (s != section)
+                            name += s.Substring(1, s.Length - 2);
                     }
-                    if (s != section)
-                        name += s.Substring(1, s.Length - 2);
+                    else
+                    {
+                        name += s;
+                    }
                 }
-                else
-                {
-                    name += s;
-                }
-            }
 
             return name;
         }
