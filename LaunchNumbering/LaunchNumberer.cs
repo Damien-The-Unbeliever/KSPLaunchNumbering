@@ -10,22 +10,6 @@ namespace LaunchNumbering
     [KSPScenario(ScenarioCreationOptions.AddToAllGames, new GameScenes[] { GameScenes.SPACECENTER, GameScenes.EDITOR, GameScenes.FLIGHT })]
     public partial class LaunchNumberer : ScenarioModule
     {
-        public static LaunchNumberer Instance;
-
-        public override void OnAwake()
-        {
-            _numbering = new Dictionary<string, Dictionary<int, Bloc>>();
-            GameEvents.OnVesselRollout.Add(RenameVessel);
-            Instance = this;
-        }
-
-
-        public void OnDestroy()
-        {
-            GameEvents.OnVesselRollout.Remove(RenameVessel);
-            Instance = null;
-        }
-
         private const string TopLevelNodeLabel = "LAUNCHNUMBERS";
         private const string SeriesNodeLabel = "SERIES";
         private const string BlocNodeLabel = "BLOC";
@@ -41,12 +25,15 @@ namespace LaunchNumbering
 
         public override void OnLoad(ConfigNode node)
         {
+            base.OnLoad(node);
+            if (LaunchNumbererMono.Instance == null || LaunchNumbererMono.Instance._numbering == null)
+                return;
             node.TryGetValue(PreferredTemplate, ref SelectTemplate.selectedTemplateName);
-            _numbering = new Dictionary<string, Dictionary<int, Bloc>>();
+            LaunchNumbererMono.Instance._numbering = new Dictionary<string, Dictionary<int, Bloc>>();
             foreach (var serNode in node.GetNodes(SeriesNodeLabel))
             {
                 var blocs = new Dictionary<int, Bloc>();
-                _numbering.Add(serNode.GetValue(BlocNameLabel), blocs);
+                LaunchNumbererMono.Instance._numbering.Add(serNode.GetValue(BlocNameLabel), blocs);
                 foreach (var blocNode in serNode.GetNodes(BlocNodeLabel))
                 {
                     blocs.Add(int.Parse(blocNode.GetValue(VesselHashLabel)), new Bloc
@@ -62,149 +49,29 @@ namespace LaunchNumbering
         }
         public override void OnSave(ConfigNode node)
         {
-            node.ClearNodes();
-            node.AddValue(PreferredTemplate, SelectTemplate.selectedTemplateName);
-            foreach (var series in _numbering)
+            if (LaunchNumbererMono.Instance != null && LaunchNumbererMono.Instance._numbering != null)
             {
-                var serNode = new ConfigNode(SeriesNodeLabel);
-                serNode.AddValue(BlocNameLabel, series.Key);
-                foreach (var bloc in series.Value)
+                node.ClearNodes();
+                node.AddValue(PreferredTemplate, SelectTemplate.selectedTemplateName);
+                foreach (var series in LaunchNumbererMono.Instance._numbering)
                 {
-                    var blocNode = new ConfigNode(BlocNodeLabel);
-                    blocNode.AddValue(VesselHashLabel, bloc.Key);
-                    blocNode.AddValue(VesselCountLabel, bloc.Value.vessel);
-                    blocNode.AddValue(BlocNumberLabel, bloc.Value.blocNumber);
-                    blocNode.AddValue(BlocRomanLabel, bloc.Value.blocRoman);
-                    blocNode.AddValue(VesselRomanLabel, bloc.Value.vesselRoman);
-                    blocNode.AddValue(ShowBlocLabel, bloc.Value.showBloc);
-                    serNode.AddNode(blocNode);
-                }
-                node.AddNode(serNode);
-            }
-        }
-
-        private Dictionary<string, Dictionary<int, Bloc>> _numbering;
-
-        public void RenameVessel(ShipConstruct sc)
-        {
-            Debug.Log("RenameVessel, vessel.landedAt: " + FlightGlobals.ActiveVessel.landedAt);
-            var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
-            if ((settings.activeOnLaunchpad &&
-                (FlightGlobals.ActiveVessel.landedAt == "LaunchPad" ||
-                 FlightGlobals.ActiveVessel.landedAt == "Woomerang_Launch_Site" ||
-                 FlightGlobals.ActiveVessel.landedAt == "Desert_Launch_Site")) ||
-                (settings.activeOnRunway &&
-                 (FlightGlobals.ActiveVessel.landedAt == "Runway" ||
-                  FlightGlobals.ActiveVessel.landedAt == "Island_Airfield" ||
-                  FlightGlobals.ActiveVessel.landedAt == "Desert_Airfield")) ||
-                (settings.activeOnExternalLaunchpad && FlightGlobals.ActiveVessel.landedAt == "External LaunchPad")
-                )
-            {
-                Vessel v = FlightGlobals.ActiveVessel;
-                int vesselHash;
-                if (SelectTemplate.selectedTemplate.Contains("blocNumber"))
-                    vesselHash = 1;
-                else
-                    vesselHash = ComputeVesselHash(v);
-
-                var vesselNumber = 1;
-                var blocNumber = 1;
-                if (!settings.addAlways && Char.IsDigit(v.vesselName[v.vesselName.Length - 1])) return;
-                if (!_numbering.ContainsKey(v.vesselName))
-                {
-                    _numbering.Add(v.vesselName, new Dictionary<int, Bloc>());
-                }
-                var nDict = _numbering[v.vesselName];
-                Bloc b;
-
-
-                if (vesselHash != 1 && nDict.Count == 1 && nDict.ContainsKey(1))
-                {
-                    //Upgrade from earlier version
-                    b = nDict[1];
-                    nDict.Remove(1);
-                    nDict.Add(vesselHash, b);
-                }
-                if (!nDict.ContainsKey(vesselHash))
-                {
-                    blocNumber = nDict.Count + 1;
-                    b = InitializeNewBloc(blocNumber);
-                    nDict.Add(vesselHash, b);
-                }
-                else
-                {
-                    b = nDict[vesselHash];
-                    vesselNumber = b.vessel + 1;
-                    b.vessel = vesselNumber;
-                    blocNumber = b.blocNumber;
-                }
-
-                v.vesselName = ProcessTemplate(v, b, vesselNumber, blocNumber);
-            }
-        }
-
-        private static Bloc InitializeNewBloc(int blocNumber)
-        {
-            var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
-            return new Bloc
-            {
-                vessel = 1,
-                blocNumber = blocNumber,
-                showBloc = settings.ShowBloc,
-                vesselRoman = settings.Scheme == LNSettings.NumberScheme.Roman,
-                blocRoman = settings.BlocScheme == LNSettings.NumberScheme.Roman
-            };
-        }
-
-        private static int ComputeVesselHash(Vessel v)
-        {
-            int nameCounter = 0;
-            var names = new Dictionary<string, int>();
-            var treeItems = new List<int>();
-            foreach (var p in v.Parts)
-            {
-                if (!names.ContainsKey(p.name)) names.Add(p.name, ++nameCounter);
-                treeItems.Add(names[p.name]);
-                if (p.children.Count > 0)
-                {
-                    treeItems.Add(-1);
-                    foreach (var c in p.children)
+                    var serNode = new ConfigNode(SeriesNodeLabel);
+                    serNode.AddValue(BlocNameLabel, series.Key);
+                    foreach (var bloc in series.Value)
                     {
-                        if (!names.ContainsKey(c.name)) names.Add(c.name, ++nameCounter);
-                        treeItems.Add(names[c.name]);
+                        var blocNode = new ConfigNode(BlocNodeLabel);
+                        blocNode.AddValue(VesselHashLabel, bloc.Key);
+                        blocNode.AddValue(VesselCountLabel, bloc.Value.vessel);
+                        blocNode.AddValue(BlocNumberLabel, bloc.Value.blocNumber);
+                        blocNode.AddValue(BlocRomanLabel, bloc.Value.blocRoman);
+                        blocNode.AddValue(VesselRomanLabel, bloc.Value.vesselRoman);
+                        blocNode.AddValue(ShowBlocLabel, bloc.Value.showBloc);
+                        serNode.AddNode(blocNode);
                     }
-                    treeItems.Add(-2);
+                    node.AddNode(serNode);
                 }
             }
-            return QuickHash(treeItems);
-        }
-        private static int QuickHash(List<int> items)
-        {
-            int hashCode = items.Count;
-            foreach (int item in items)
-            {
-                hashCode = unchecked(hashCode * 314159 + item);
-            }
-            return hashCode;
-        }
-
-        private readonly int[] _RValues = new int[] { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
-        private readonly string[] _RStrings = new string[] { "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
-
-        public string ToRoman(int value)
-        {
-            var rindex = 0;
-            var result = string.Empty;
-            while (value > 0)
-            {
-                while (_RValues[rindex] > value)
-                {
-                    rindex++;
-                }
-                value = value - _RValues[rindex];
-                result = result + _RStrings[rindex];
-            }
-            return result;
+            base.OnSave(node);
         }
 
     }

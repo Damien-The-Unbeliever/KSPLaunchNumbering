@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using KSP.UI.Screens;
 
@@ -78,9 +75,9 @@ namespace LaunchNumbering
         void LoadData(bool setDefault = false)
         {
             //ReadDefault();
-            if (System.IO.File.Exists(LaunchNumberer.PLUGINDATA))
+            if (System.IO.File.Exists(LaunchNumbererMono.PLUGINDATA))
             {
-                var t = System.IO.File.ReadAllLines(LaunchNumberer.PLUGINDATA);
+                var t = System.IO.File.ReadAllLines(LaunchNumbererMono.PLUGINDATA);
                 templatelist.Clear();
                 foreach (var l in t)
                 {
