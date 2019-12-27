@@ -1,0 +1,7 @@
+# Template file
+# Format:  TemplateName, template
+
+Default,{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}
+Mk,{[name]}{-[launchNumber]}{ (Mk [blocNumber])}
+Mark,{[name]}{-[launchNumber]}{ (Mark [blocNumber])}
+No block,{[name]}{-[launchNumber]}
