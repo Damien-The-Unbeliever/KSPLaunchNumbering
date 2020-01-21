@@ -1,5 +1,8 @@
 ChangeLog
 
+0.5.3.3
+	Fixed MonoBehaviour to never go away, was preventing numbers from being assigned
+
 0.5.3.2
 	Fixed Scenario module, was causing nullrefs and preventing anything from being done in the game
 

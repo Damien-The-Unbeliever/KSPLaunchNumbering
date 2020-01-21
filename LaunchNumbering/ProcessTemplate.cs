@@ -15,21 +15,26 @@ namespace LaunchNumbering
     {
         public static LaunchNumbererMono Instance;
 
-        public  void OnAwake()
+        internal static string PLUGINDATA;
+        internal static string DEFAULTDATA;
+
+        void Awake()
         {
+            PLUGINDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/templates.dat";
+            DEFAULTDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/default.dat";
+
             _numbering = new Dictionary<string, Dictionary<int, Bloc>>();
             GameEvents.OnVesselRollout.Add(RenameVessel);
             Instance = this;
+            DontDestroyOnLoad(this);
         }
-
+        //internal const string defaultTemplate = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
 
         public void OnDestroy()
         {
             GameEvents.OnVesselRollout.Remove(RenameVessel);
             Instance = null;
         }
-
-
 
         internal Dictionary<string, Dictionary<int, Bloc>> _numbering;
 
@@ -157,17 +162,6 @@ namespace LaunchNumbering
 
 
 
-        internal static string PLUGINDATA;
-        internal static string DEFAULTDATA;
-
-        void Awake()
-        {
-            PLUGINDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/templates.dat";
-            DEFAULTDATA = KSPUtil.ApplicationRootPath + "GameData/LaunchNumbering/PluginData/default.dat";
-
-
-        }
-        //internal const string defaultTemplate = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
 
         string ProcessTemplate(string template, Vessel v, Bloc b, int vesselNumber, int blocNumber)
         {
