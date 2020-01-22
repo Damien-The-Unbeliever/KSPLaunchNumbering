@@ -1,5 +1,13 @@
 ChangeLog
 
+0.5.4
+	Made the selected template persistent
+	Added option to always show the bloc number
+	Resized window
+	Added option to change the skin
+	Added example ship name to selection menu
+	Added toggle to show some options on the selection menu
+
 0.5.3.3
 	Fixed MonoBehaviour to never go away, was preventing numbers from being assigned
 

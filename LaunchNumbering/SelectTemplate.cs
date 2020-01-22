@@ -10,7 +10,6 @@ namespace LaunchNumbering
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     class SelectTemplate : MonoBehaviour
     {
-        const string DEFAULT_TEMPLATE = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
 
         internal const string MODID = "LaunchNumbering_NS";
         internal const string MODNAME = "Launch Numbering Templates";
@@ -19,7 +18,7 @@ namespace LaunchNumbering
 
         Rect WindowRect;
         Vector2 scrollVector;
-        const int HEIGHT = 400;
+        const int HEIGHT = 300;
         const int WIDTH = 400;
 
         void Start()
@@ -53,24 +52,35 @@ namespace LaunchNumbering
         void OnGUI()
         {
             if (GUIEnabled)
+            {
+
+                if (!HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>().useAltSkin)
+                    GUI.skin = HighLogic.Skin;
                 WindowRect = ClickThruBlocker.GUILayoutWindow(4946386, WindowRect, DoWindow, "Launch Numbering Templates");
+            }
         }
 
         public class Template
         {
             public string name;
             public string template;
-
+            public string example;
             public Template(string Name, string Template)
             {
                 name = Name;
                 template = Template;
+                MakeExample();
+            }
+            internal void MakeExample()
+            {
+                Bloc b = LaunchNumbererMono.InitializeNewBloc(1);
+
+                example = LaunchNumbererMono.Instance.ProcessTemplate(template, "Ship Name", b, 1, 1);
             }
         }
         List<Template> templatelist = new List<Template>();
-        internal static string selectedTemplateName = "Default";
-        internal static string selectedTemplate = DEFAULT_TEMPLATE;
         bool showTemplate = false;
+        bool showOptions = false;
 
         void LoadData(bool setDefault = false)
         {
@@ -87,8 +97,8 @@ namespace LaunchNumbering
                         var template = l.Substring(l.IndexOf(',') + 1);
                         templatelist.Add(new Template(name, template));
 
-                        if (setDefault && name == selectedTemplateName)
-                            selectedTemplate = template;
+                        if (setDefault && name == LaunchNumberer.Instance.selectedTemplateName)
+                            LaunchNumberer.Instance.SelectedTemplate = template;
                     }
                 }
             }
@@ -115,12 +125,34 @@ namespace LaunchNumbering
 
             GUILayout.BeginHorizontal();
             showTemplate = GUILayout.Toggle(showTemplate, "Show full template");
+            GUILayout.FlexibleSpace();
+            showOptions = GUILayout.Toggle(showOptions, "Show options", GUILayout.Width(200));
+            GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+            if (showOptions)
+            {
+                var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
+
+                GUILayout.BeginHorizontal();                
+                settings.ShowBloc = GUILayout.Toggle(settings.ShowBloc, "Show Bloc numbers", GUILayout.Width(175));
+                //GUILayout.FlexibleSpace();
+                settings.addBlocAlways = GUILayout.Toggle(settings.addBlocAlways, "Add Bloc number always", GUILayout.Width(175));
+                //GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                settings.addToFirstVessel = GUILayout.Toggle(settings.addToFirstVessel, "Add to first vessel", GUILayout.Width(175));
+                //GUILayout.FlexibleSpace();
+                settings.addAlways = GUILayout.Toggle(settings.addAlways, "Add number always", GUILayout.Width(175));
+                //GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+                
+            }
             GUILayout.BeginHorizontal();
             if (showTemplate)
-                GUILayout.Label("Current Template: " + selectedTemplate);
+                GUILayout.Label("Current Template: " + LaunchNumberer.Instance.SelectedTemplate);
             else
-                GUILayout.Label("Current Template: " + selectedTemplateName);
+                GUILayout.Label("Current Template: " + LaunchNumberer.Instance.selectedTemplateName);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -130,16 +162,18 @@ namespace LaunchNumbering
             string displayText = "";
             foreach (var t in templatelist)
             {
+                if (showOptions)
+                    t.MakeExample();
                 GUILayout.BeginHorizontal();
 
                 if (showTemplate)
                     displayText = t.template;
                 else
-                    displayText = t.name;
+                    displayText = t.name + "     " + t.example;
                 if (GUILayout.Button(displayText))
                 {
-                    selectedTemplate = t.template;
-                    selectedTemplateName = t.name;
+                    LaunchNumberer.Instance.SelectedTemplate = t.template;
+                    LaunchNumberer.Instance.selectedTemplateName = t.name;
                 }
                 GUILayout.EndHorizontal();
             }

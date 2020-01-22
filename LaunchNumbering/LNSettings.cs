@@ -34,6 +34,10 @@ namespace LaunchNumbering
             toolTip = "If false and the last char of a vessel name is a digit, no number will be added")]
         public bool addAlways { get; set; } = false;
 
+        [GameParameters.CustomParameterUI("Add Bloc number always",
+            toolTip = "If tru, the bloc number will always be added")]
+        public bool addBlocAlways { get; set; } = false;
+
         [GameParameters.CustomParameterUI("Add to first vessel",
             toolTip = "Add even to the first vessel in a unique series")]
         public bool addToFirstVessel { get; set; } = false;
@@ -55,5 +59,10 @@ namespace LaunchNumbering
         [GameParameters.CustomParameterUI("Active on external Launchpads",
             toolTip ="This option is for the Extra Planetary Launchpads mod")]
         public bool activeOnExternalLaunchpad { get; set; } = true;
+
+
+        [GameParameters.CustomParameterUI("Use Alternate Skin",
+            toolTip = "If true, uses an alternate skin for the window")]
+        public bool useAltSkin { get; set; } = true;
     }
 }

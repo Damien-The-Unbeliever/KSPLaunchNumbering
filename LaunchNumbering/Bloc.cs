@@ -11,6 +11,8 @@ namespace LaunchNumbering
 		public int blocNumber;
 		public bool blocRoman;
 		public bool vesselRoman;
-		public bool showBloc; 
+		public bool showBloc;
+		public bool addAlways;
+		public bool addBlocAlways;
 	}
 }

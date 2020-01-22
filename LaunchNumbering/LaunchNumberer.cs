@@ -10,6 +10,22 @@ namespace LaunchNumbering
     [KSPScenario(ScenarioCreationOptions.AddToAllGames, new GameScenes[] { GameScenes.SPACECENTER, GameScenes.EDITOR, GameScenes.FLIGHT })]
     public partial class LaunchNumberer : ScenarioModule
     {
+
+        static internal LaunchNumberer Instance;
+        public const string DEFAULT_TEMPLATE = "{[name]}{-[launchNumber]}{ (Bloc [blocNumber])}";
+
+        [KSPField(isPersistant = true)]
+        internal string selectedTemplateName = "Default";
+
+        [KSPField(isPersistant = true)]
+        string selectedTemplate = DEFAULT_TEMPLATE;
+
+        internal string SelectedTemplate
+        {
+            set { selectedTemplate = value.Replace("{", "<").Replace("}", ">"); }
+            get { return selectedTemplate.Replace("<", "{").Replace(">","}"); }
+        }
+
         private const string TopLevelNodeLabel = "LAUNCHNUMBERS";
         private const string SeriesNodeLabel = "SERIES";
         private const string BlocNodeLabel = "BLOC";
@@ -23,12 +39,17 @@ namespace LaunchNumbering
         private const float MessageDisplayLength = 5.0f;
         private const string PreferredTemplate = "preferred-template";
 
+        void Start()
+        {
+            Debug.Log("LaunchNumbering.Scenario.Start");
+            Instance = this;
+        }
         public override void OnLoad(ConfigNode node)
         {
             base.OnLoad(node);
             if (LaunchNumbererMono.Instance == null || LaunchNumbererMono.Instance._numbering == null)
                 return;
-            node.TryGetValue(PreferredTemplate, ref SelectTemplate.selectedTemplateName);
+            node.TryGetValue(PreferredTemplate, ref LaunchNumberer.Instance.selectedTemplateName);
             LaunchNumbererMono.Instance._numbering = new Dictionary<string, Dictionary<int, Bloc>>();
             foreach (var serNode in node.GetNodes(SeriesNodeLabel))
             {
@@ -52,7 +73,7 @@ namespace LaunchNumbering
             if (LaunchNumbererMono.Instance != null && LaunchNumbererMono.Instance._numbering != null)
             {
                 node.ClearNodes();
-                node.AddValue(PreferredTemplate, SelectTemplate.selectedTemplateName);
+                node.AddValue(PreferredTemplate, LaunchNumberer.Instance.selectedTemplateName);
                 foreach (var series in LaunchNumbererMono.Instance._numbering)
                 {
                     var serNode = new ConfigNode(SeriesNodeLabel);

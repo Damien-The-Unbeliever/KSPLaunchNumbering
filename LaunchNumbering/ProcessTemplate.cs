@@ -10,10 +10,10 @@ using System.Text.RegularExpressions;
 
 namespace LaunchNumbering
 {
-    [KSPAddon( KSPAddon.Startup.FlightEditorAndKSC, true)]
-    partial class LaunchNumbererMono:MonoBehaviour
+    [KSPAddon(KSPAddon.Startup.FlightEditorAndKSC, true)]
+    partial class LaunchNumbererMono : MonoBehaviour
     {
-        public static LaunchNumbererMono Instance;
+        internal static LaunchNumbererMono Instance;
 
         internal static string PLUGINDATA;
         internal static string DEFAULTDATA;
@@ -40,7 +40,7 @@ namespace LaunchNumbering
 
         public void RenameVessel(ShipConstruct sc)
         {
-            Debug.Log("RenameVessel, vessel.landedAt: " + FlightGlobals.ActiveVessel.landedAt);
+            //Debug.Log("RenameVessel, vessel.landedAt: " + FlightGlobals.ActiveVessel.landedAt);
             var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
             if ((settings.activeOnLaunchpad &&
                 (FlightGlobals.ActiveVessel.landedAt == "LaunchPad" ||
@@ -55,7 +55,7 @@ namespace LaunchNumbering
             {
                 Vessel v = FlightGlobals.ActiveVessel;
                 int vesselHash;
-                if (SelectTemplate.selectedTemplate.Contains("blocNumber"))
+                if (LaunchNumberer.Instance.SelectedTemplate.Contains("blocNumber"))
                     vesselHash = 1;
                 else
                     vesselHash = ComputeVesselHash(v);
@@ -96,7 +96,7 @@ namespace LaunchNumbering
             }
         }
 
-        private static Bloc InitializeNewBloc(int blocNumber)
+        internal static Bloc InitializeNewBloc(int blocNumber)
         {
             var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
             return new Bloc
@@ -104,6 +104,9 @@ namespace LaunchNumbering
                 vessel = 1,
                 blocNumber = blocNumber,
                 showBloc = settings.ShowBloc,
+                addAlways = settings.addAlways,
+                addBlocAlways = settings.addBlocAlways,
+
                 vesselRoman = settings.Scheme == LNSettings.NumberScheme.Roman,
                 blocRoman = settings.BlocScheme == LNSettings.NumberScheme.Roman
             };
@@ -163,43 +166,62 @@ namespace LaunchNumbering
 
 
 
-        string ProcessTemplate(string template, Vessel v, Bloc b, int vesselNumber, int blocNumber)
+        internal string ProcessTemplate(string template, string vesselName, Bloc b, int vesselNumber, int blocNumber)
         {
+#if true
+            Debug.Log("ProcessTemplate, template: " + template);
+            Debug.Log("vesselName: " + vesselName);
+            Debug.Log("Bloc: " + b);
+            Debug.Log("vesselNumber: " + vesselNumber);
+            Debug.Log("blocNumber: " + blocNumber);
+#endif
+
             var settings = HighLogic.CurrentGame.Parameters.CustomParams<LNSettings>();
+
             string name = "";
 
             string outerPattern = "{.*?}";
             var sections = Regex.Split(template, "(" + outerPattern + ")");
 
             foreach (string section in sections)
+            {
+                Debug.Log("section: " + section);
                 if (section != "")
                 {
                     string s = section;
                     if (s.Contains("[name]") || s.Contains("[launchNumber]") || s.Contains("blocNumber]"))
                     {
-                        s = s.Replace("[name]", v.vesselName);
-                        if (vesselNumber > 1 || settings.addAlways)
+                        if (s.Contains("[name]"))
+                        {
+                            s = s.Replace("[name]", vesselName);
+                        }
+                        if (vesselNumber > 1 || b.addAlways)
+                        {
                             s = s.Replace("[launchNumber]", (b.vesselRoman ? ToRoman(vesselNumber) : vesselNumber.ToString("D" + (settings.launchNumberMinDigits).ToString())));
+                        }
 
-                        if (blocNumber > 1 && b.showBloc)
+                        if (b.showBloc && (b.addBlocAlways || blocNumber > 1))
                         {
                             s = s.Replace("[blocNumber]", (b.blocRoman ? ToRoman(blocNumber) : blocNumber.ToString("D" + (settings.blocNumberMinDigits).ToString())));
                         }
+
                         if (s != section)
                             name += s.Substring(1, s.Length - 2);
+
                     }
                     else
                     {
                         name += s;
                     }
                 }
-
+            }
+            Debug.Log("name: " + name);
             return name;
         }
 
-        string ProcessTemplate(Vessel v, Bloc b, int vesselNumber, int blocNumber)
+        internal string ProcessTemplate(Vessel v, Bloc b, int vesselNumber, int blocNumber)
         {
-            string s = ProcessTemplate(SelectTemplate.selectedTemplate, v, b, vesselNumber, blocNumber);
+            string s = ProcessTemplate(LaunchNumberer.Instance.SelectedTemplate, v.vesselName, b, vesselNumber, blocNumber);
             //Debug.Log("template: " + SelectTemplate.selectedTemplate);
             //Debug.Log("vesselName: " + s);
 
