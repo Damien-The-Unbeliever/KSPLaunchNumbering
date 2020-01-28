@@ -1,5 +1,8 @@
 ChangeLog
 
+0.5.4.1
+	Fixed exception happening during load which caused numbers to get reset
+
 0.5.4
 	Made the selected template persistent
 	Added option to always show the bloc number

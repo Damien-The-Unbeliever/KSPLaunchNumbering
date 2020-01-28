@@ -8,7 +8,7 @@ using UnityEngine;
 namespace LaunchNumbering
 {
     [KSPScenario(ScenarioCreationOptions.AddToAllGames, new GameScenes[] { GameScenes.SPACECENTER, GameScenes.EDITOR, GameScenes.FLIGHT })]
-    public partial class LaunchNumberer : ScenarioModule
+    public class LaunchNumberer : ScenarioModule
     {
 
         static internal LaunchNumberer Instance;
@@ -39,16 +39,15 @@ namespace LaunchNumbering
         private const float MessageDisplayLength = 5.0f;
         private const string PreferredTemplate = "preferred-template";
 
-        void Start()
-        {
-            Debug.Log("LaunchNumbering.Scenario.Start");
-            Instance = this;
-        }
         public override void OnLoad(ConfigNode node)
         {
+            Debug.Log("LaunchNumbering.Scenario.OnLoad");
+
+            Instance = this;
             base.OnLoad(node);
             if (LaunchNumbererMono.Instance == null || LaunchNumbererMono.Instance._numbering == null)
                 return;
+            
             node.TryGetValue(PreferredTemplate, ref LaunchNumberer.Instance.selectedTemplateName);
             LaunchNumbererMono.Instance._numbering = new Dictionary<string, Dictionary<int, Bloc>>();
             foreach (var serNode in node.GetNodes(SeriesNodeLabel))
